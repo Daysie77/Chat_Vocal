@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block centre %}
+<div class="container-fluid vh-100 d-flex p-0">
+    {% include 'partial/navbar.html' %}
+
+    <div class="card w-100 h-100 mx-0 my-0" id="chat-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <button class="btn btn-primary btn-sm" onclick="showPopup()">Nouvelle Conversation</button>
+            <h4>Daysie Bot</h4>
+        </div>
+        <div class="card-body overflow-auto" id="chatlog">
+            {% for message in messages %}
+            <div class="message {% if message.sender == user_id %}user{% else %}bot{% endif %}">
+                <img src="{% if message.sender == user_id %}{{ url_for('static', filename=user.profileImage) }}{% else %}{{ url_for('static', filename='bot_avatar.jpg') }}{% endif %}"
+                    class="avatar">
+                <div class="message-content">{{ message.content }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="card-footer d-flex align-items-center" style="height: 16%;">
+            <!-- <button class="btn btn-light" onclick="EmojiPicker()">
+                <i class="far fa-smile" style="color: #007bff;"></i>
+            </button> -->
+            <div class="input-group flex-grow-1 mx-2">
+                <textarea class="form-control" id="userInput" placeholder="Tapez un message..." rows="1"></textarea>
+                <div class="input-group-append">
+                    <button class="btn btn-primary" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+            <button class="btn btn-light" id="microphoneButton" onclick="startRecording()">
+                <i class="fas fa-microphone" style="color: #007bff;"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="titlePopup" class="popup">
+    <div class="popup-content">
+        <span class="close" onclick="hidePopup()">&times;</span>
+        <input type="text" id="conversationTitle" placeholder="Titre de la conversation">
+        <button class="btn btn-primary btn-sm" onclick="startNewConversation()">Démarrer</button>
+    </div>
+</div>
+
+<style>
+    .popup {
+        display: none;
+        position: fixed;
+        z-index: 9;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+        padding-top: 60px;
+    }
+
+    .popup-content {
+        background-color: #ffffff;
+        margin: 5% auto;
+        padding: 20px;
+        border: 2px solid #888;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    input {
+        border: 1px solid #007bff;
+    }
+
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}

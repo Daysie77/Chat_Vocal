@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block centre %}
+<div class="container-fluid vh-100 d-flex p-0">
+    {% include 'partial/navbar.html' %}
+
+    <div class="card w-100 h-100 mx-0 my-0" id="chat-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <button class="btn btn-primary btn-sm" onclick="newConversation()">Nouvelle Conversation</button>
+            <h4>Daysie Bot</h4>
+        </div>
+        <div class="section_connexion_page_container">
+            <div class="section_connexion_page_container1">
+                <form method="post" action="{{ url_for('deconnexion') }}" class="tableau">
+                    <div>
+                        <h2>Se déconnecter</h2>
+                    </div>
+                    <div class="formu1">
+                        <p>Voulez-vous vous déconnecter, {{ user.nom }} ?</p>
+                        <img src="{{ url_for('static', filename=user.profileImage) }}" class="avatar"
+                            alt="Profil Image">
+                    </div>
+                    <div class="boutton">
+                        <div class="btn1">
+                            <a href="{{ url_for('interface') }}">Retour</a>
+                        </div>
+                        <div class="btn2" style="color: white;">
+                            <button type="submit" name="confirm" value="yes">Déconnecter</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock centre %}

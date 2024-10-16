@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT Clone</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/initialize.css') }}"> -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        #chatlog {
+            display: flex;
+            flex-direction: column;
+            height: calc(100% - 56px - 56px);
+            /* Adjust for header and footer */
+        }
+
+        .message {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .message.user .avatar,
+        .message.bot .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.user .message-content {
+            background-color: #007bff;
+            color: white;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 70%;
+        }
+
+        .message.bot .message-content {
+            background-color: #f1f0f0;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 70%;
+        }
+
+        #sidebar-wrapper {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #discussion-list {
+            overflow-y: auto;
+            /* Activation du défilement vertical automatique lorsque nécessaire */
+            max-height: calc(100vh - 112px);
+            /* Hauteur maximale de la fenêtre visible moins la hauteur des éléments fixes */
+        }
+
+        .list-group-item {
+            cursor: pointer;
+        }
+
+        .list-group-item:hover {
+            background-color: #f1f1f1;
+        }
+
+        #sidebar-wrapper .user-section {
+            border-top: 1px solid #ddd;
+            padding: 15px;
+        }
+
+        #sidebar-wrapper .user-section img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        #sidebar-wrapper .user-section .user-info {
+            margin-left: 10px;
+        }
+
+        #chat-card {
+            height: 100vh;
+            /* Full height */
+        }
+
+        .card-footer .btn-light {
+            border: none;
+            background-color: transparent;
+            font-size: 1.5rem;
+        }
+
+        .input-group textarea {
+            resize: none;
+            overflow-y: auto;
+            max-height: 150px;
+            /* Adjust as needed */
+        }
+
+        .dropdown-toggle::after {
+            display: none;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: auto;
+            bottom: 100%;
+            /* Position the dropdown above */
+            left: 0;
+            will-change: transform;
+            transform: translate3d(0px, -100%, 0px);
+            /* Adjust to make sure it appears above */
+        }
+
+        #conversation-list {
+            max-height: 425px;
+            /* Ajustez selon votre mise en page et besoin */
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        span {
+            font-size: 25px;
+            font-weight: bold;
+            color: #007bff;
+            text-align: center;
+        }
+
+        /* style_clone.css */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.2);
+                opacity: 0.5;
+            }
+        }
+
+        .recording {
+            animation: pulse 1s infinite;
+        }
+
+        /* .stickers-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    position: absolute;
+    bottom: 50px;
+    right: 10px;
+    z-index: 1000;
+}
+
+.sticker {
+    cursor: pointer;
+    font-size: 24px;
+    padding: 5px;
+}
+
+
+.emoji-picker {
+    position: absolute;
+    bottom: 60px;
+    right: 20px;
+} */
+
+        #progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+        }
+
+        #progress-bar div {
+            width: 0;
+            height: 20px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+
+        /* .dropdown-menu.position-absolute {
+    top: -50px;
+    right: 0;
+} */
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid vh-100 d-flex p-0">
+        <div class="bg-light border-right d-flex flex-column" id="sidebar-wrapper">
+            <div>
+                <div class="sidebar-heading d-flex justify-content-between align-items-center">
+                    <span>Historique des Conversations</span>
+                </div>
+
+                <div class="list-group list-group-flush" id="conversation-list">
+                    <!-- Liste des conversations -->
+                </div>
+            </div>
+            <div class="mt-auto p-3 border-top">
+                <div class="dropup dropup-center position-relative">
+                    <button class="btn btn-secondary d-flex align-items-center dropdown-toggle custom-dropdown-btn"
+                        type="button" id="userDropdown" data-bs-toggle="dropdown" aria-haspopup="true"
+                        aria-expanded="false">
+                        <style>
+                            /* CSS for custom dropdown button */
+                            .custom-dropdown-btn {
+                                background-color: #ddd !important;
+                                /* Background color #ddd */
+                                border: none !important;
+                                /* Remove border */
+                                color: black !important;
+                                /* Black text color */
+                                height: 100%;
+                                /* Take height of parent div */
+                                transition: none;
+                                /* Prevent background color change on hover */
+                            }
+
+                            /* CSS for dropdown caret */
+                            .dropdown-caret::after {
+                                border-top-color: black;
+                                /* Black dropdown caret color */
+                            }
+
+                            /* Optional: Hover effect on dropdown items */
+                            .dropdown-item:hover {
+                                background-color: #f8f9fa;
+                                /* Light gray background on hover */
+                            }
+                        </style>
+                        <img src="/static/user.jpg" alt="User" class="rounded-circle" width="40" height="40">
+                        <div class="ml-3">
+                            <h6 class="mb-0 font-weight-bold">John Doe</h6>
+                            <small class="text-muted">johndoe@example.com</small>
+                        </div>
+                        <span class="dropdown-caret"></span> <!-- Black dropdown caret -->
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#" onclick="showProfile()">Profil</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()">Déconnexion</a></li>
+                    </ul>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="card w-100 h-100 mx-0 my-0" id="chat-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <button class="btn btn-primary btn-sm" onclick="newConversation()">Nouvelle Conversation</button>
+                <h4>Daysie Bot</h4>
+            </div>
+            <div class="card-body overflow-auto" id="chatlog">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="card-footer d-flex align-items-center">
+                <button class="btn btn-light" onclick="EmojiPicker()">
+                    <i class="far fa-smile" style="color: #007bff;"></i>
+                </button>
+                <div class="input-group flex-grow-1 mx-2">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-light" type="button"
+                            onclick="document.getElementById('fileInput').click();">
+                            <i class="fas fa-paperclip" style="color: #007bff;"></i>
+                        </button>
+                        <input type="file" id="fileInput" style="display: none;" onchange="fileSelected(event)">
+                    </div>
+                    <textarea class="form-control" id="userInput" placeholder="Tapez un message..." rows="1"></textarea>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <button class="btn btn-light" id="microphoneButton" onclick="startRecording()">
+                    <i class="fas fa-microphone" style="color: #007bff;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- JS Bootstrap 5 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.0/js/bootstrap.bundle.min.js"></script>
+
+    <!-- <script src="{{ url_for('static', filename='js/Emoji.js') }}"></script> -->
+    <script>
+        let currentConversationId = null;
+        let recognition;
+        let isRecording = false;
+
+        document.addEventListener("DOMContentLoaded", function () {
+            loadConversations();
+            initSpeechRecognition();
+        });
+
+        function loadConversations() {
+            fetch('/get_conversations')
+                .then(response => response.json())
+                .then(data => {
+                    const conversationList = document.getElementById('conversation-list');
+                    conversationList.innerHTML = '';
+                    data.forEach(conversation => {
+                        const listItem = document.createElement('a');
+                        listItem.href = '#';
+                        listItem.className = 'list-group-item list-group-item-action';
+                        listItem.textContent = conversation.title;
+                        listItem.onclick = () => loadMessages(conversation.id);
+                        conversationList.appendChild(listItem);
+                    });
+                });
+        }
+
+        function loadMessages(conversation_id) {
+            currentConversationId = conversation_id;
+            fetch(`/get_messages/${conversation_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const chatlog = document.getElementById('chatlog');
+                    chatlog.innerHTML = '';
+                    data.forEach(message => {
+                        const messageElement = document.createElement('div');
+                        messageElement.className = `message ${message.sender}`;
+                        messageElement.innerHTML = `<img src="/static/${message.sender}.jpg" class="avatar">
+                                                 <div class="message-content">${message.content}</div>`;
+                        chatlog.appendChild(messageElement);
+                    });
+                    chatlog.scrollTop = chatlog.scrollHeight;
+                });
+        }
+
+        function newConversation() {
+            fetch('/start_new_conversation', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    loadConversations();
+                    currentConversationId = data.conversation_id;
+                    document.getElementById('chatlog').innerHTML = '';
+                });
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === '') return;
+
+            const chatlog = document.getElementById('chatlog');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'message user';
+            userMessage.innerHTML = `<img src="/static/user.jpg" class="avatar"><div class="message-content">${userInput}</div>`;
+            chatlog.appendChild(userMessage);
+
+            // Prepare formData to send both file and message
+            const formData = new FormData();
+            formData.append('user_input', userInput);
+            formData.append('conversation_id', currentConversationId);
+            if (selectedFile) {
+                formData.append('file', selectedFile, selectedFile.name);
+            }
+
+            fetch('/chat', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot';
+
+                    if (data.response.startsWith("https://www.youtube.com/embed/")) {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = data.response + "?autoplay=1";
+                        iframe.width = "560";
+                        iframe.height = "315";
+                        iframe.frameBorder = "0";
+                        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+                        iframe.allowFullscreen = true;
+                        botMessage.appendChild(iframe);
+                    } else {
+                        botMessage.innerHTML = `<img src="/static/bot_avatar.jpg" class="avatar"><div class="message-content">${data.response}</div>`;
+
+                        // Speech synthesis for bot response
+                        const utterance = new SpeechSynthesisUtterance(data.response);
+                        utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === 'Google UK English Female');
+                        speechSynthesis.speak(utterance);
+                    }
+
+                    chatlog.appendChild(botMessage);
+                    chatlog.scrollTop = chatlog.scrollHeight;
+                });
+
+            document.getElementById('userInput').value = '';
+        }
+
+        document.getElementById('userInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent line break in textarea
+                sendMessage();
+            }
+        });
+
+        let selectedFile = null;
+
+        function fileSelected(event) {
+            selectedFile = event.target.files[0];
+
+            const fileName = selectedFile.name;
+            const fileMessage = document.createElement('div');
+            fileMessage.className = 'message user file';
+            fileMessage.innerHTML = `<img src="/static/user.jpg" class="avatar"><div class="message-content">${fileName} <progress id="fileProgress" value="0" max="100"></progress></div>`;
+            document.getElementById('chatlog').appendChild(fileMessage);
+        }
+
+        function adjustTextareaHeight() {
+            const textarea = document.getElementById('userInput');
+            textarea.style.height = 'auto';
+            textarea.style.height = (textarea.scrollHeight) + 'px';
+        }
+
+        document.getElementById('userInput').addEventListener('input', adjustTextareaHeight);
+
+        // Profile and logout functions
+        function showProfile() {
+            alert('Profil: John Doe\nEmail: johndoe@example.com');
+        }
+
+        function logout() {
+            alert('Déconnexion');
+        }
+
+        function initSpeechRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = 'fr-FR';
+            recognition.interimResults = true;
+            recognition.continuous = true;
+            recognition.onresult = function (event) {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0])
+                    .map(result => result.transcript)
+                    .join('');
+
+                document.getElementById('userInput').value = transcript;
+                adjustTextareaHeight();
+
+                if (event.results[0].isFinal) {
+                    sendMessage();
+                }
+            };
+
+            recognition.onerror = function (event) {
+                console.error('Speech recognition error:', event.error);
+            };
+        }
+
+        function startRecording() {
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                document.getElementById('microphoneButton').classList.remove('recording');
+            } else {
+                recognition.start();
+                isRecording = true;
+                document.getElementById('microphoneButton').classList.add('recording');
+
+                // Speech synthesis to prompt user to speak
+                const utterance = new SpeechSynthesisUtterance("Parlez maintenant");
+                utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === 'Google UK English Female');
+                speechSynthesis.speak(utterance);
+            }
+        }
+    </script>
+    <!-- <script>
+
+        new EmojiPicker({
+            trigger: [
+                {
+                    selector: '.btn1',
+                    insertInto: ['.txt0', '.txt1'] //If there is only one '.selector', than it can be used without array
+                },
+                {
+                    selector: '#btn2',
+                    insertInto: '.txt1'
+                }
+            ],
+            closeButton: true,
+            dragButton: true,
+            width: 350,
+            height: 370,
+            addPosX: -130,
+            addPosY: -380,
+            tabbed: false,
+            navPos: "bottom",
+            navButtonReversed: false,
+            disableSearch: false,
+            hiddenScrollBar: true, // Not for Firefox
+            animation: "slideDown",
+            animationDuration: "1s",
+            disableNav: false,
+            emojiDim: {
+                emojiPerRow: 5,
+                emojiSize: 30,
+                emojiButtonHeight: 80,
+                hideCategory: true
+            },
+            // color: {
+            // pickerBackground: "#181818",
+            // searchBackground: "#202020",
+            // foreground: "#fff",
+            // navbarColor: "#000",
+            // iconHoverColor: "",
+            // borderColor: "",
+            // searchBackground: "",
+            // navbarColor: "",
+            // navButtonHoverBG: "",
+            // navButtonActiveBG: "",
+            // navSvgFill: "",
+            // closeMoveButtonColor: "",
+            // }
+            // navButtonSvg: {
+            // button1: "",
+            // button2: "",
+            // button3: "",
+            // button4: "",
+            // button5: "",
+            // button6: "",
+            // button7: "",
+            // button8: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 30.487 30.486" style="enable-background:new 0 0 30.487 30.486;" xml:space="preserve"> <g> <path d="M28.866,17.477h-2.521V15.03h-2.56c0.005-2.8-0.304-5.204-0.315-5.308l-0.088-0.67L22.75,8.811 c-0.021-0.008-0.142-0.051-0.317-0.109l2.287-8.519L19,4.836L15.23,0.022V0l-0.009,0.01L15.215,0v0.021l-3.769,4.815L5.725,0.183 l2.299,8.561c-0.157,0.051-0.268,0.09-0.288,0.098L7.104,9.084l-0.088,0.67c-0.013,0.104-0.321,2.508-0.316,5.308h-2.56v2.446H1.62 l0.447,2.514L1.62,22.689h6.474c1.907,2.966,5.186,7.549,7.162,7.797v-0.037c1.979-0.283,5.237-4.838,7.137-7.79h6.474l-0.447-2.67 L28.866,17.477z M21.137,20.355c-0.422,1.375-4.346,6.949-5.907,7.758v0.015c-1.577-0.853-5.461-6.373-5.882-7.739 c-0.002-0.043-0.005-0.095-0.008-0.146l11.804-0.031C21.141,20.264,21.139,20.314,21.137,20.355z M8.972,15.062 c-0.003-1.769,0.129-3.403,0.219-4.298c0.98-0.271,3.072-0.723,6.065-0.78v-0.03c2.979,0.06,5.063,0.51,6.04,0.779 c0.09,0.895,0.223,2.529,0.219,4.298L8.972,15.062z"/> </g> <g> </g> <g> </g> <g> </g> </svg>`
+            // }
+            // addEmoji: {
+            //     pickerTab: "a",
+            //     customPickerTabIcon: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve"> <g> <g> <path d="M437.02,74.98C388.667,26.629,324.38,0,256,0S123.333,26.629,74.98,74.98C26.629,123.333,0,187.62,0,256 s26.629,132.668,74.98,181.02C123.333,485.371,187.62,512,256,512s132.667-26.629,181.02-74.98 C485.371,388.668,512,324.38,512,256S485.371,123.333,437.02,74.98z M256,472c-119.103,0-216-96.897-216-216S136.897,40,256,40 s216,96.897,216,216S375.103,472,256,472z"/> </g> </g> <g> <g> <path d="M368.993,285.776c-0.072,0.214-7.298,21.626-25.02,42.393C321.419,354.599,292.628,368,258.4,368 c-34.475,0-64.195-13.561-88.333-40.303c-18.92-20.962-27.272-42.54-27.33-42.691l-37.475,13.99 c0.42,1.122,10.533,27.792,34.013,54.273C171.022,389.074,212.215,408,258.4,408c46.412,0,86.904-19.076,117.099-55.166 c22.318-26.675,31.165-53.55,31.531-54.681L368.993,285.776z"/> </g> </g> <g> <g> <circle cx="168" cy="180.12" r="32"/> </g> </g> <g> <g> <circle cx="344" cy="180.12" r="32"/> </g> </g> <g> </g> <g> </g> <g> </g> </svg>`,
+            //     emoji: [
+            //         {
+            //             "emoji": "⚡",
+            //             "title": "electronic"
+            //         },
+            //         {
+            //             "emoji": "🚑",
+            //             "title": "car"
+            //         },
+            //     ]
+            // } && many more options to pick from...
+        });
+
+
+    </script> -->
+</body>
+
+</html>

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block centre %}
+<div class="container-fluid vh-100 d-flex p-0">
+    {% include 'partial/navbar.html' %}
+
+    <div class="card w-100 h-100 mx-0 my-0" id="chat-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <button class="btn btn-primary btn-sm" onclick="newConversation()">Nouvelle Conversation</button>
+            <h4>Daysie Bot</h4>
+        </div>
+        <!-- Affichage des messages flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="flash-message {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+
+        <!-- Formulaire de profil utilisateur -->
+        <div class="card-body overflow-auto">
+            <form method="POST" action="{{ url_for('profil') }}">
+                <div class="form-group text-center">
+                    <label for="profileImage" class="profile-picture-container">
+                        <img src="{{ url_for('static', filename=user.profileImage)}}" alt="Profile Picture" class="profile-picture">
+                    </label>
+                </div>
+
+                
+                <div class="form-group">
+                    <label for="nom">Nom Complet</label>
+                    <input type="text" class="form-control" id="nom" name="nom" value="{{ user.nom }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="username">Nom d'utilisateur</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Nouveau mot de passe (laisser vide pour conserver le mot de passe
+                        actuel)</label>
+                    <input type="password" class="form-control" id="password" name="password">
+                </div>
+                <button type="submit" class="btn btn-primary">Mettre à jour le profil</button>
+            </form>
+            <!-- Formulaire de mise à jour de la photo de profil -->
+            <form method="POST" action="{{ url_for('update_profile_image') }}" enctype="multipart/form-data">
+                <input type="file" id="profileImageUpdate" name="profileImage" class="d-none">
+                <button type="button" class="btn btn-link text-decoration-none" id="edit-profile-image">
+                    <i class="fas fa-pen"></i> Modifier la photo de profil
+                </button>
+                <button type="submit" class="btn btn-primary d-none" id="submit-profile-image">Sauvegarder</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Activer le bouton de sélection de fichier pour la photo de profil
+    document.getElementById('edit-profile-image').addEventListener('click', function () {
+        document.getElementById('profileImageUpdate').click();
+    });
+
+    // Rendre visible le bouton de soumission une fois qu'une image est sélectionnée
+    document.getElementById('profileImageUpdate').addEventListener('change', function () {
+        document.getElementById('submit-profile-image').classList.remove('d-none');
+    });
+</script>
+{% endblock %}
