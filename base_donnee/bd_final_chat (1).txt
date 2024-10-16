@@ -1,0 +1,33 @@
+===Base de données bd_final_chat
+
+== Structure de la table conversations
+
+|------
+|Colonne|Type|Null|Valeur par défaut
+|------
+|//**id**//|int|Non|
+|user_id|int|Non|
+|title|varchar(150)|Non|
+|created_at|timestamp|Oui|CURRENT_TIMESTAMP
+== Structure de la table messages
+
+|------
+|Colonne|Type|Null|Valeur par défaut
+|------
+|//**id**//|int|Non|
+|conversation_id|int|Non|
+|content|text|Non|
+|sender|enum(&#039;user&#039;, &#039;bot&#039;)|Non|
+|created_at|timestamp|Oui|CURRENT_TIMESTAMP
+== Structure de la table users
+
+|------
+|Colonne|Type|Null|Valeur par défaut
+|------
+|//**id**//|int|Non|
+|nom|varchar(150)|Non|
+|username|varchar(50)|Non|
+|email|varchar(100)|Non|
+|password|varchar(100)|Non|
+|profileImage|varchar(200)|Oui|NULL
+|created_at|timestamp|Oui|CURRENT_TIMESTAMP

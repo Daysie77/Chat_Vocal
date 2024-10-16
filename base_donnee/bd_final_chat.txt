@@ -1,0 +1,47 @@
+===Base de données bd_final_chat
+
+== Structure de la table conversations
+
+|------
+|Colonne|Type|Null|Valeur par défaut
+|------
+|//**id**//|int|Non|
+|user_id|int|Non|
+|title|varchar(150)|Non|
+|created_at|timestamp|Oui|CURRENT_TIMESTAMP
+== Déchargement des données de la table conversations
+
+|1|1|Soutenance|2024-07-19 11:51:42
+== Structure de la table messages
+
+|------
+|Colonne|Type|Null|Valeur par défaut
+|------
+|//**id**//|int|Non|
+|conversation_id|int|Non|
+|content|text|Non|
+|sender|enum(&#039;user&#039;, &#039;bot&#039;)|Non|
+|created_at|timestamp|Oui|CURRENT_TIMESTAMP
+== Déchargement des données de la table messages
+
+|1|1|Bonjour|user|2024-07-19 11:51:47
+|2|1|Bonjour! Comment puis-je vous aider aujourd&#039;hui ?|bot|2024-07-19 11:51:53
+|3|1|Parlez maintenant, je veux Fanny sous tes noms sur des machines learning.|user|2024-07-19 11:52:28
+|4|1|Bonjour ! Tu veux parler de Fanny et du machine learning ? Peux-tu préciser ce que tu souhaites savoir ou discuter ? Est-ce que tu cherches des informations spécifiques sur Fanny et son lien avec le machine learning ou quelque chose d&#039;autre ?|bot|2024-07-19 11:52:30
+|5|1|Parlez maintenant, je veux Fanny sous tes noms sur des machines learning.Bonjour.Tu veux parler de famille et du machine learning, peux-tu préciser ce que tu sous ?|user|2024-07-19 11:52:39
+|6|1|Bonjour! Il semble que tu souhaites parler de la famille et du machine learning, mais je ne suis pas tout à fait sûr de ce que tu veux dire par &quot;Fanny sous tes noms sur des machines learning.&quot; Peux-tu donner plus de détails ou clarifier ta demande? Je suis là pour t&#039;aider!|bot|2024-07-19 11:52:42
+== Structure de la table users
+
+|------
+|Colonne|Type|Null|Valeur par défaut
+|------
+|//**id**//|int|Non|
+|nom|varchar(150)|Non|
+|username|varchar(50)|Non|
+|email|varchar(100)|Non|
+|password|varchar(100)|Non|
+|profileImage|varchar(200)|Oui|NULL
+|created_at|timestamp|Oui|CURRENT_TIMESTAMP
+== Déchargement des données de la table users
+
+|1|GNIMI|desie|gnimi2julienne@gmail.com|$2b$12$x5YCdsnG2JZBD4u110i1N.j06L595ScNJqgIG.O6mwOac1Sz.pTL2|uploads/images_profil_parent/bot_avatar.jpg|2024-07-19 11:50:32
